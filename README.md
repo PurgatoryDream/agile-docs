@@ -3,7 +3,6 @@ This is an MVP for an application that uses version-control technology alongside
 
 Documentation should never be something that is left undone, but the fast pace at which Agile development moves often leaves projects without any documentation. The objective of this project is to aid with that.
 
------
 ### 1. Requirements
 ------
 TBA.
