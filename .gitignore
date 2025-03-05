@@ -1,1 +1,4 @@
 .venv
+.env
+dev_files/*
+__pycache__/*

@@ -1,11 +1,26 @@
+###########################################################
+######### Imports                  
+########################################################### 
 import os
-
+import dotenv
 import uvicorn
+import logging
 from fastapi import FastAPI
 
-# Initialiaze the app:
-app = FastAPI()
+from .conf import *
+from .dependencies import fake_db
+from .routers import auth, repos
 
-@app.get("/test")
+###########################################################
+######### Configuration
+###########################################################
+app = FastAPI()
+app.include_router(auth.router)
+app.include_router(repos.router)
+
+###########################################################
+######### Routes:
+###########################################################
+@app.get("/")
 def hello_world():
-    return {"response": "Hello World!"}
+    return {"status": "ok!"}
