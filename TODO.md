@@ -4,19 +4,30 @@ TODO list for the project.
 ### Todo 
 -------
 
-- [ ] Prepare application's front-end.
-  - [ ] Implement a minimal front-end to preview functionality.
+- [ ] Prepare a basic front-end for the application.
+  - [ ] Login screen.
+  - [ ] Page with user's repositories.
+  - [ ] Visualize the documents in the repository, allow for uploads, etc.
+  - [ ] Implementation of version-control operations with the backend.
+- [ ] Implement LLM agents to ask questions about the workspace.
+  - [ ] Global questions.
+  - [ ] Ask about specific folders, information retrieval.
+  - [ ] Generate documentation from files (code, documents, etc.)
+  - [ ] ...
+- [ ] Dockerize application, prepare migrations scripts, etc.
 
 ### In Progress
 -------
 
 - [ ] Prepare the backend code for the application.
-  - [ ] Set up a basic database for permissions, access, etc.
-  - [ ] Prepare an API with basic operations.
-  - [ ] Implement version control to track changes.
+  - [X] Prepare an API with basic auth.
+  - [X] Prepare models for the DB (minimal, for prototyping).
+  - [X] Repository creation, basic adding and committing.
+  - [ ] CRUD operations with the database, move from local fake db to PostgreSQL.
+  - [ ] Initialize Alembic for migration scripts and generating the DB.
 
 ### Done (✓)
 -------
 
-- [x] Work on the repository's structrure.
-- [x] Create the repository.
+- [X] Work on the repository's structrure.
+- [X] Create the repository.

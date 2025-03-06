@@ -3,10 +3,8 @@
 #----------------------------------------------------------
 ### Handles all the authorization code, along with
 ### getting information from the user from the
-### database.               
+### database.
 ###########################################################
-######### Imports                  
-########################################################### 
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from uuid import UUID
@@ -16,8 +14,7 @@ from jwt.exceptions import InvalidTokenError
 from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..models.auth import Token, TokenData
-from ..models.user import User, UserDB
+from ..schemas import Token, TokenData, User, UserDB
 from ..dependencies import fake_db
 from ..conf import SECRET_KEY, ALGORITHM, ACCESSS_TOKEN_EXPIRE_MINUTES, pwd_context, oauth2_scheme
 

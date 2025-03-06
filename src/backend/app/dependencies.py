@@ -8,5 +8,5 @@ fake_db = {
         },
     },
     "permissions": [],
-    "repositories": []
+    "repositories": {}
 }

@@ -1,4 +1,6 @@
 .venv
 .env
+.pyc
 dev_files/*
-__pycache__/*
+__pycache__/
+fake_db.json
