@@ -1,6 +1,7 @@
 .venv
 .env
 .pyc
+docker-compose.yml
 dev_files/*
 __pycache__/
 fake_db.json

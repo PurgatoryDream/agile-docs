@@ -15,17 +15,25 @@ class TokenData(BaseModel):
 ###########################################################
 ######### User Classes                
 ########################################################### 
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+
 class User(BaseModel):
     id: UUID
     username: str
-    email: str | None = None
+    email: str
     
 class UserDB(User):
     hashed_password: str
 
 ###########################################################
 ######### Repository Classes                
-########################################################### 
+###########################################################
+class RepositoryCreate(BaseModel):
+    name: str
+
 class Repository(BaseModel):
     id: UUID
     name: str

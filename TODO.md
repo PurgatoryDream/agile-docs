@@ -23,8 +23,10 @@ TODO list for the project.
   - [X] Prepare an API with basic auth.
   - [X] Prepare models for the DB (minimal, for prototyping).
   - [X] Repository creation, basic adding and committing.
-  - [ ] CRUD operations with the database, move from local fake db to PostgreSQL.
-  - [ ] Initialize Alembic for migration scripts and generating the DB.
+  - [X] Initialize Alembic for migration scripts and generating the DB.
+  - [X] CRUD operations with the database.
+  - [ ] Move from local fake db to PostgreSQL.
+
 
 ### Done (✓)
 -------

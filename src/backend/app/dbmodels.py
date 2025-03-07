@@ -1,7 +1,9 @@
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Column, Integer, String, ForeignKey
-from .db import BaseDB
+from sqlalchemy.ext.declarative import declarative_base
+
+BaseDB = declarative_base()
 
 class User(BaseDB):
     __tablename__ = "users"
