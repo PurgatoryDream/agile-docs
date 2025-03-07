@@ -11,57 +11,55 @@ import uuid
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, List, Optional
+from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter
 
 from .auth import get_current_active_user
-from ..schemas import User, UserDB, Repository, PermissionsRepo
-from ..dependencies import fake_db
+from ..db import get_db
+from ..crud import get_user, get_repository, get_user_repositories, create_new_repo
+from ..schemas import User, UserDB, Repository, RepositoryCreate, PermissionsRepo
 from ..conf import REPO_PATH
 
 ###########################################################
 ######### Helper functions       
 ###########################################################
-def get_user_repo_perms(db, user_id):
-	permissions = []
-	for perm in db["permissions"]:
-		perm_obj = PermissionsRepo(**perm)
-		if perm_obj.user_id == user_id:
-			permissions.append(perm_obj)
-	return permissions
+def create_new_repo_git(db, username, repo_name):
+	# Check if the user already has a repo with that name:
+	user_repos = get_user_repositories(db, username)
+	for repo in user_repos:
+		repo_id = repo.repository_id
+		repo_data = get_repository(db, repo_id)
+		if repo_data.name == repo_name:
+			return False
 
-def create_new_repo(db, user_id, repo_name):
-	if repo_name in db["repositories"]:
-		return False
-	
 	# Create the folder and initialize a repo:
-	repo_folder = os.path.join(REPO_PATH, repo_name)
-	os.mkdir(repo_folder)
-	repo = git.Repo.init(repo_folder)
+	try:
+		repo_folder = os.path.join(REPO_PATH, repo_name)
+		os.mkdir(repo_folder)
+		repo = git.Repo.init(repo_folder)
+	except Exception as e:
+		print(f"Error creating repo. {e}")
+		return False
 
 	# Insert in database:
-	repo_uuid = uuid.uuid4()
-	repo_uuid_str = str(repo_uuid)
-	db["repositories"][repo_uuid_str] = {
-		"id": repo_uuid_str,
-		"name": repo_name,
-		"description": "",
-		"owner_id": repo_uuid_str
-	}
+	repo_data = RepositoryCreate(name=repo_name)
+	db_repo, db_userperms = create_new_repo(db, username, repo_data)
 
-	return Repository(**db["repositories"][repo_uuid_str])
+	return Repository(**db_repo)
 
-def get_existing_repo(db, user_id, repo_name: str):
-	if repo_name not in db["repositories"]:
-		return False
+def get_existing_repo(db, username, repo_name: str):
+	# Check if the user already has a repo with that name:
+	found = False
+	repo_data = None
+	user_repos = get_user_repositories(db, username)
+	for repo in user_repos:
+		repo_id = repo.repository_id
+		repo_data = get_repository(db, repo_id)
+		if repo_data.name == repo_name:
+			found = True
+			break
 	
-	# Check if the user has permissions for this repo:
-	repo_data = Repository(**db["repositories"][repo_name])
-	user_permissions = get_user_repo_perms(db, user_id)
-	allowed = False
-	for perm in user_permissions:
-		if perm.user_id == user_id and perm.repository_id == repo_data.id:
-			allowed = True
-	if not allowed:
+	if not found:
 		return False
 
 	# Get the repository object:
@@ -96,16 +94,18 @@ router = APIRouter(
 
 @router.get("/")
 async def get_repo_list(
-    current_user: Annotated[User, Depends(get_current_active_user)]
+    current_user: Annotated[User, Depends(get_current_active_user)],
+	db: Annotated[Session, Depends(get_db)]
 ) -> List[PermissionsRepo]:
-	return get_user_repo_perms(fake_db, current_user.id)
+	return get_user_repositories(db, current_user.username)
 
 @router.post("/create")
 async def new_repo(
 	current_user: Annotated[User, Depends(get_current_active_user)],
-	repo_name: str
+	repo_name: str,
+	db: Annotated[Session, Depends(get_db)]
 ) -> Repository:
-	repo = create_new_repo(fake_db, current_user.id, repo_name)
+	repo = create_new_repo_git(db, current_user.username, repo_name)
 	if not repo:
 		raise HTTPException(
 			status_code=status.HTTP_409_CONFLICT,
@@ -117,9 +117,10 @@ async def new_repo(
 async def add_files(
 	current_user: Annotated[User, Depends(get_current_active_user)],
 	repo_name: str,
+	db: Annotated[Session, Depends(get_db)],
 	files: List[str] | str = "*"
 ):
-	repo = get_existing_repo(fake_db, current_user.id, repo_name)
+	repo = get_existing_repo(db, current_user.username, repo_name)
 	if not repo:
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,
@@ -141,9 +142,10 @@ async def add_files(
 async def commit_repo(
 	current_user: Annotated[User, Depends(get_current_active_user)],
 	repo_name: str,
+	db: Annotated[Session, Depends(get_db)],
 	message: str | None = None
 ):
-	repo = get_existing_repo(fake_db, current_user.id, repo_name)
+	repo = get_existing_repo(db, current_user.username, repo_name)
 	if not repo:
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,
@@ -162,9 +164,10 @@ async def commit_repo(
 async def rollback_commit(
 	current_user: Annotated[User, Depends(get_current_active_user)],
 	repo_name: str,
-	commit_hash: str
+	commit_hash: str,
+	db: Annotated[Session, Depends(get_db)]
 ):
-	repo = get_existing_repo(fake_db, current_user.id, repo_name)
+	repo = get_existing_repo(db, current_user.username, repo_name)
 	if not repo:
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,

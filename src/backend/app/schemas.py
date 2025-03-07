@@ -38,7 +38,6 @@ class Repository(BaseModel):
     id: UUID
     name: str
     description: Optional[str] = None
-    owner_id: UUID
     
 class PermissionsRepo(BaseModel):
     user_id: UUID

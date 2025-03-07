@@ -7,6 +7,7 @@
 ###########################################################
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
+from sqlalchemy.orm import Session
 from uuid import UUID
 
 import jwt
@@ -15,7 +16,8 @@ from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ..schemas import Token, TokenData, User, UserDB
-from ..dependencies import fake_db
+from ..db import get_db
+from ..crud import get_user, get_repository, get_user_repositories
 from ..conf import SECRET_KEY, ALGORITHM, ACCESSS_TOKEN_EXPIRE_MINUTES, pwd_context, oauth2_scheme
 
 ###########################################################
@@ -26,11 +28,6 @@ def verify_password(plain_password, hashed_password):
 
 def get_password_hash(password):
 	return pwd_context.hash(password)
-
-def get_user(db, username: str):
-	if username in db["users"]:
-		user_dict = db["users"][username]
-		return UserDB(**user_dict)
 
 def authenticate_user(db, username: str, password: str):
 	user = get_user(db, username)
@@ -54,7 +51,8 @@ def create_access_token(
 	return encoded_jwt
 
 async def get_current_user(
-		token: Annotated[str, Depends(oauth2_scheme)]
+		token: Annotated[str, Depends(oauth2_scheme)],
+		db: Annotated[Session, Depends(get_db)]
 ):
 	credentials_exception = HTTPException(
 		status_code=status.HTTP_401_UNAUTHORIZED,
@@ -70,7 +68,7 @@ async def get_current_user(
 	except InvalidTokenError:
 		raise credentials_exception
 	
-	user = get_user(fake_db, username=token_data.username)
+	user = get_user(db, username=token_data.username)
 	if user is None:
 		raise credentials_exception
 	
@@ -88,14 +86,15 @@ router = APIRouter()
 
 @router.post("/auth/token", tags=["auth"])
 async def login_for_access_token(
-	form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+	form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+	db: Annotated[Session, Depends(get_db)]
 ) -> Token:
 	credentials_exception = HTTPException(
 		status_code=status.HTTP_401_UNAUTHORIZED,
 		detail="Incorrect username or password.",
 		headers={"WWW-Authenticate": "Bearer"}
 	)
-	user = authenticate_user(fake_db, form_data.username, form_data.password)
+	user = authenticate_user(db, form_data.username, form_data.password)
 	if not user:
 		raise credentials_exception
 	

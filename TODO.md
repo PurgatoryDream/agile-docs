@@ -25,7 +25,7 @@ TODO list for the project.
   - [X] Repository creation, basic adding and committing.
   - [X] Initialize Alembic for migration scripts and generating the DB.
   - [X] CRUD operations with the database.
-  - [ ] Move from local fake db to PostgreSQL.
+  - [X] Move from local fake db to PostgreSQL.
 
 
 ### Done (✓)
