@@ -5,7 +5,7 @@ import uuid
 from .routers.auth import get_password_hash
 from . import dbmodels, schemas
 
-def get_user(db: Session, username: str):
+def get_user(db: Session, username: str) -> dbmodels.User:
     return db.query(dbmodels.User).filter(dbmodels.User.username == username).first()
 
 def create_user(db: Session, user: schemas.UserCreate):
@@ -17,10 +17,10 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
-def get_repository(db: Session, repository_id: UUID):
+def get_repository(db: Session, repository_id: UUID) -> dbmodels.Repository:
     return db.query(dbmodels.Repository).filter(dbmodels.Repository.id == repository_id).first()
 
-def get_user_repositories(db: Session, username: UUID):
+def get_user_repositories(db: Session, username: str):
     db_user = get_user(db, username)
     return db.query(dbmodels.UserPermission).filter(dbmodels.UserPermission.user_id == db_user.id).all()
 
