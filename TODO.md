@@ -15,7 +15,9 @@ TODO list for the project.
 -------
 
 - [ ] Prepare a basic front-end for the application.
-  - [ ] Login screen.
+  - [X] Login screen.
+  - [X] Prepare vue.js templates, design application flow.
+  - [ ] Integrate backend with the frontend (JWT authentication, etc.).
   - [ ] Page with user's repositories.
   - [ ] Visualize the documents in the repository, allow for uploads, etc.
   - [ ] Implementation of version-control operations with the backend.

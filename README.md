@@ -5,4 +5,14 @@ Documentation should never be something that is left undone, but the fast pace a
 
 ### 1. Requirements
 ------
-TBA.
+- Python 3.12
+- npm installed
+
+### 2. How to run the environment:
+------
+1. Initialize a Python environment.
+2. Install dependencies with `pip install -r requirements.txt`.
+3. Prepare your PostgreSQL database with the Alembic scripts.
+4. Prepare a .venv file with your database information.
+5. Run the python script through `uvicorn src.backend.app.main:app --host 0.0.0.0 --port {{whatever port}}`
+6. Deploy the frontend through `npm run dev` in the `src/frontend` folder.
